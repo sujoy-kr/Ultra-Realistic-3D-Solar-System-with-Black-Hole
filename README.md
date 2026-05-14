@@ -1,10 +1,12 @@
-# Ultra-Realistic 3D Solar System + Gargantua
+# Ultra-Realistic 3D Solar System + Gargantua (from Interstellar) Simulation
 
-A high-performance, interactive 3D space simulation built with **Three.js**. This project features a procedural solar system and a gravitationally accurate (visual) representation of a "Gargantua" style black hole, complete with post-processing bloom and custom shaders. It's fully build using Google Gemini.
+A high-performance, interactive 3D space simulation built with **Three.js**. This project features a procedural solar system and a gravitationally accurate (visual) representation of a "Gargantua" style black hole, complete with post-processing bloom and custom shaders. It's fully built using Google Gemini.
 
-## 🚀 Live Features
+## 🚀 Live Demo
 
-### 🪐 Celestial Bodies
+[View the simulation here](https://solar-system-with-black-hole.sujoykr8.workers.dev)
+
+## 🪐 Celestial Bodies
 
 - **Dynamic Sun:** Procedural corona particles, multiple glow layers, and sunspot textures.
 - **The Eight Planets:** Individual rotation speeds, axial tilts, and custom-generated textures (canvas-based).
@@ -14,12 +16,14 @@ A high-performance, interactive 3D space simulation built with **Three.js**. Thi
 
 ### 🕳️ The "Gargantua" Black Hole
 
+_Inspired by the film Interstellar_
+
 - **Event Horizon:** A light-absorbing black core.
 - **Accretion Disk:** A swirling, glowing disk with custom UV mapping to simulate heat gradients.
 - **Gravitational Lensing:** A Fresnel-based halo shader that simulates the bending of light.
 - **Spacetime Warp:** Focusing on the black hole triggers a FOV "warp" effect and a particle-based "pulling space" animation.
 
-### 🛠️ Technical Highlights
+## 🛠️ Technical Highlights
 
 - **Post-Processing:** Uses `EffectComposer` with `UnrealBloomPass` for realistic light bleeding.
 - **Optimized Rendering:** Instanced rendering for asteroids and custom canvas textures to reduce external asset dependency.
@@ -39,4 +43,4 @@ A high-performance, interactive 3D space simulation built with **Three.js**. Thi
 
 - [Three.js](https://threejs.org/) (Core Library)
 - [OrbitControls](https://threejs.org/docs/#examples/en/controls/OrbitControls)
-- [UnrealBloomPass](https://www.google.com/search?q=https://threejs.org/docs/%23examples/en/postprocessing/UnrealBloomPass)
+- [UnrealBloomPass](https://threejs.org/docs/#examples/en/postprocessing/UnrealBloomPass)
