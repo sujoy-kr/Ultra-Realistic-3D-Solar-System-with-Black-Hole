@@ -1,6 +1,6 @@
 # Ultra-Realistic 3D Solar System + Gargantua
 
-A high-performance, interactive 3D space simulation built with **Three.js**. This project features a procedural solar system and a gravitationally accurate (visual) representation of a "Gargantua" style black hole, complete with post-processing bloom and custom shaders.
+A high-performance, interactive 3D space simulation built with **Three.js**. This project features a procedural solar system and a gravitationally accurate (visual) representation of a "Gargantua" style black hole, complete with post-processing bloom and custom shaders. It's fully build using Google Gemini.
 
 ## 🚀 Live Features
 
