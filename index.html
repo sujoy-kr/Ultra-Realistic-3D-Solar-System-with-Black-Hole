@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultra-Realistic 3D Solar System</title>
+    <title>Ultra-Realistic 3D Solar System + Gargantua</title>
     <style>
         body {
             margin: 0;
@@ -46,7 +46,8 @@
     <div id="info">
         <strong>Left Click:</strong> Rotate &nbsp;|&nbsp; <strong>Right Click:</strong> Pan &nbsp;|&nbsp;
         <strong>Scroll:</strong> Zoom to Cursor<br>
-        <strong>Double-Click a Planet</strong> to lock focus &nbsp;|&nbsp; <strong>Double-Click space</strong> to reset
+        <strong>Double-Click a Planet/Black Hole</strong> to lock focus &nbsp;|&nbsp; <strong>Double-Click
+            space</strong> to reset
     </div>
     <!-- 1. Three.js Core -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -56,7 +57,6 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
     <!-- 4. Post-Processing Dependencies (ORDER IS CRITICAL) -->
-    <!-- Pass.js MUST come before ShaderPass and EffectComposer -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/Pass.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
@@ -70,7 +70,7 @@
             const scene = new THREE.Scene()
             scene.fog = new THREE.FogExp2(0x000010, 0.00000025)
 
-            const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.5, 4000)
+            const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.5, 6000)
             camera.position.set(0, 45, 140)
             camera.lookAt(0, 0, 0)
 
@@ -107,7 +107,7 @@
             controls.dampingFactor = 0.08
             controls.enableZoom = false
             controls.target.set(0, 0, 0)
-            controls.maxDistance = 600
+            controls.maxDistance = 2500 // Increased to allow viewing the black hole properly
             controls.minDistance = 8
             controls.update()
 
@@ -136,7 +136,7 @@
             for (let i = 0; i < starCount; i++) {
                 const theta = Math.random() * Math.PI * 2
                 const phi = Math.acos(2 * Math.random() - 1)
-                const dist = 800 + Math.random() * 1600
+                const dist = 800 + Math.random() * 2500
                 positions[i * 3] = Math.sin(phi) * Math.cos(theta) * dist
                 positions[i * 3 + 1] = Math.sin(phi) * Math.sin(theta) * dist
                 positions[i * 3 + 2] = Math.cos(phi) * dist
@@ -172,14 +172,14 @@
             const ambientLight = new THREE.AmbientLight(0x0a0a18, 0.7)
             scene.add(ambientLight)
 
-            const sunLight = new THREE.PointLight(0xfff8e7, 5.5, 1200, 0.6)
+            const sunLight = new THREE.PointLight(0xfff8e7, 5.5, 1500, 0.6)
             sunLight.castShadow = true
             sunLight.shadow.mapSize.width = 2048
             sunLight.shadow.mapSize.height = 2048
             sunLight.shadow.bias = -0.0004
             sunLight.shadow.normalBias = 0.02
             sunLight.shadow.camera.near = 0.5
-            sunLight.shadow.camera.far = 1200
+            sunLight.shadow.camera.far = 1500
             scene.add(sunLight)
 
             const sunLightWarm = new THREE.PointLight(0xffaa44, 2.5, 800, 0.8)
@@ -791,6 +791,143 @@
             scene.add(asteroidBelt)
 
             // ─────────────────────────────────────
+            // 11.5 BLACK HOLE (GARGANTUA STYLE)
+            // ─────────────────────────────────────
+            const blackHoleGroup = new THREE.Group()
+            blackHoleGroup.position.set(1200, -80, -900) // Far out in space
+            scene.add(blackHoleGroup)
+
+            // 1. Event Horizon (The absolute black core)
+            const ehRadius = 30
+            const ehGeo = new THREE.SphereGeometry(ehRadius, 64, 64)
+            const ehMat = new THREE.MeshBasicMaterial({ color: 0x000000 })
+            const eventHorizon = new THREE.Mesh(ehGeo, ehMat)
+            eventHorizon.name = 'Black Hole'
+            blackHoleGroup.add(eventHorizon)
+            interactables.push(eventHorizon) // Make it clickable
+
+            // 2. Accretion Disk Texture Generator
+            function bhDiskTextureDraw(ctx, w, h) {
+                const grad = ctx.createLinearGradient(0, 0, w, 0)
+                grad.addColorStop(0, 'rgba(0,0,0,0)')
+                grad.addColorStop(0.05, 'rgba(255, 240, 200, 1)')
+                grad.addColorStop(0.1, 'rgba(255, 200, 100, 0.95)')
+                grad.addColorStop(0.25, 'rgba(255, 120, 40, 0.8)')
+                grad.addColorStop(0.5, 'rgba(180, 50, 10, 0.6)')
+                grad.addColorStop(0.75, 'rgba(80, 20, 5, 0.2)')
+                grad.addColorStop(1, 'rgba(0,0,0,0)')
+                ctx.fillStyle = grad
+                ctx.fillRect(0, 0, w, h)
+
+                // Add swirling orbital streaks to disk
+                ctx.globalCompositeOperation = 'lighter'
+                for (let i = 0; i < 3000; i++) {
+                    const x = Math.random() * w
+                    const y = Math.random() * h
+                    const length = 15 + Math.random() * 60
+                    const opacity = Math.random() * 0.4
+                    ctx.fillStyle = `rgba(255, 180, 80, ${opacity})`
+                    ctx.fillRect(x, y, length, Math.random() * 1.5)
+                }
+            }
+
+            // 3. Accretion Disk Mesh
+            const bhDiskTex = createCanvasTexture(1024, 64, bhDiskTextureDraw)
+            const diskInnerR = ehRadius * 1.3
+            const diskOuterR = ehRadius * 3.5
+            const bhDiskGeo = new THREE.RingGeometry(diskInnerR, diskOuterR, 128, 64)
+
+            // Map the UVs linearly along the radius to map our linear gradient texture properly
+            const pos = bhDiskGeo.attributes.position
+            const uv = bhDiskGeo.attributes.uv
+            for (let i = 0; i < pos.count; i++) {
+                const x = pos.getX(i)
+                const y = pos.getY(i)
+                const dist = Math.sqrt(x * x + y * y)
+                const u = (dist - diskInnerR) / (diskOuterR - diskInnerR)
+                uv.setXY(i, u, 0.5)
+            }
+
+            const bhDiskMat = new THREE.MeshBasicMaterial({
+                map: bhDiskTex,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.95,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            })
+            const accretionDisk = new THREE.Mesh(bhDiskGeo, bhDiskMat)
+            accretionDisk.rotation.x = Math.PI / 1.9 // Tilted
+            accretionDisk.rotation.y = Math.PI / 8
+            blackHoleGroup.add(accretionDisk)
+
+            // 4. Lensing Halo (Fresnel Glow to fake bent light around the sphere)
+            const bhHaloGeo = new THREE.SphereGeometry(ehRadius + 1.5, 64, 64)
+            const bhHaloMat = new THREE.ShaderMaterial({
+                uniforms: {
+                    c: { type: "f", value: 0.1 },
+                    p: { type: "f", value: 2.0 },
+                    glowColor: { type: "c", value: new THREE.Color(0xffaa55) },
+                    viewVector: { type: "v3", value: camera.position }
+                },
+                vertexShader: `
+                    uniform vec3 viewVector;
+                    varying float intensity;
+                    void main() {
+                        vec3 vNormal = normalize( normalMatrix * normal );
+                        vec3 vNormel = normalize( normalMatrix * viewVector );
+                        intensity = pow( c - dot(vNormal, vNormel), p );
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+                    }
+                `,
+                fragmentShader: `
+                    uniform vec3 glowColor;
+                    varying float intensity;
+                    void main() {
+                        vec3 glow = glowColor * intensity;
+                        gl_FragColor = vec4( glow, intensity * 0.8 );
+                    }
+                `,
+                side: THREE.BackSide,
+                blending: THREE.AdditiveBlending,
+                transparent: true,
+                depthWrite: false
+            })
+            const bhHalo = new THREE.Mesh(bhHaloGeo, bhHaloMat)
+            blackHoleGroup.add(bhHalo)
+
+            // 5. "Pulling Space" Particle System for animation
+            const bhParticleCount = 4000
+            const bhParticleGeo = new THREE.BufferGeometry()
+            const bhPositions = new Float32Array(bhParticleCount * 3)
+            const bhRadii = new Float32Array(bhParticleCount)
+            const bhAngles = new Float32Array(bhParticleCount * 2) // theta, phi
+
+            for (let i = 0; i < bhParticleCount; i++) {
+                bhRadii[i] = 40 + Math.random() * 800
+                bhAngles[i * 2] = Math.random() * Math.PI * 2 // Theta (around Y)
+                // Concentrate particles mostly near the accretion disk plane
+                bhAngles[i * 2 + 1] = (Math.random() - 0.5) * 0.6 + Math.PI / 2
+            }
+            bhParticleGeo.setAttribute('position', new THREE.BufferAttribute(bhPositions, 3))
+
+            const bhParticleMat = new THREE.PointsMaterial({
+                color: 0xffddaa,
+                size: 0.8,
+                transparent: true,
+                opacity: 0.0, // Invisible until focused
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            })
+            const bhParticles = new THREE.Points(bhParticleGeo, bhParticleMat)
+
+            // Align particle rotation somewhat with accretion disk
+            bhParticles.rotation.x = Math.PI / 1.9
+            bhParticles.rotation.y = Math.PI / 8
+            blackHoleGroup.add(bhParticles)
+
+
+            // ─────────────────────────────────────
             // 12. RAYCASTER & CUSTOM ZOOM
             // ─────────────────────────────────────
             const raycaster = new THREE.Raycaster()
@@ -817,7 +954,7 @@
                     const newTarget = controls.target.clone().sub(intersectPoint).multiplyScalar(zoomFactor).add(
                         intersectPoint)
                     const distToSun = newCamPos.length()
-                    if (distToSun > 7 && distToSun < 700) {
+                    if (distToSun > 7 && distToSun < 3500) {
                         camera.position.copy(newCamPos)
                         controls.target.copy(newTarget)
                         controls.update()
@@ -857,6 +994,7 @@
                 const dt = Math.min(clock.getDelta(), 0.1)
                 const elapsed = performance.now() * 0.001
 
+                // Original Sun & Planets Animation
                 sun.rotation.y += 0.0015
                 coronaParticles.rotation.y += 0.0008
                 coronaParticles.rotation.x += 0.0003
@@ -883,10 +1021,60 @@
                 }
                 asteroidBelt.rotation.y += 0.00025
 
+                // Black Hole Animation
+                accretionDisk.rotation.z -= 0.01
+
+                // Update Halo View Vector for Fresnel effect
+                bhHaloMat.uniforms.viewVector.value = new THREE.Vector3().subVectors(camera.position, blackHoleGroup.position)
+
+                // "Pulling Space" logic when Black Hole is focused
+                const pullPositions = bhParticleGeo.attributes.position.array
+                let isBHFocused = targetObject && targetObject.name === 'Black Hole'
+
+                if (isBHFocused) {
+                    bhParticleMat.opacity = Math.min(0.8, bhParticleMat.opacity + 0.02)
+                } else {
+                    bhParticleMat.opacity = Math.max(0.0, bhParticleMat.opacity - 0.02)
+                }
+
+                // Update particles
+                for (let i = 0; i < bhParticleCount; i++) {
+                    let r = bhRadii[i]
+                    if (isBHFocused) {
+                        r -= (r * 0.03 + 1.0) // Pull heavily inward
+                        if (r < ehRadius) r = 800 // Reset outside
+                        bhRadii[i] = r
+                    } else {
+                        // Slow drift
+                        bhAngles[i * 2] -= 0.001
+                    }
+                    const theta = bhAngles[i * 2] + (800 - r) * 0.004 // Spiral swirl effect
+                    const phi = bhAngles[i * 2 + 1]
+
+                    pullPositions[i * 3] = r * Math.sin(phi) * Math.cos(theta)
+                    pullPositions[i * 3 + 1] = r * Math.cos(phi)
+                    pullPositions[i * 3 + 2] = r * Math.sin(phi) * Math.sin(theta)
+                }
+                bhParticleGeo.attributes.position.needsUpdate = true
+
+                // Dynamic Camera Focus & Warp effect
                 if (targetObject) {
                     const targetPosition = new THREE.Vector3()
                     targetObject.getWorldPosition(targetPosition)
                     controls.target.lerp(targetPosition, 0.08)
+
+                    if (targetObject.name === 'Black Hole') {
+                        controls.minDistance = 90 // Prevent clipping into event horizon
+                        camera.fov = THREE.MathUtils.lerp(camera.fov, 70, 0.02) // Warp FOV effect
+                    } else {
+                        controls.minDistance = 8
+                        camera.fov = THREE.MathUtils.lerp(camera.fov, 42, 0.05)
+                    }
+                    camera.updateProjectionMatrix()
+                } else {
+                    controls.minDistance = 8
+                    camera.fov = THREE.MathUtils.lerp(camera.fov, 42, 0.05)
+                    camera.updateProjectionMatrix()
                 }
 
                 controls.update()
